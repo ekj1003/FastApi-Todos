@@ -21,7 +21,11 @@
         todoList.innerHTML = "";
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          li.textContent = `${todo.title}: ${todo.description}`;
+          li.innerHTML = `
+            ${todo.title}: ${todo.description}
+            <button onclick="editTodo(${todo.id}, '${todo.title}', '${todo.description}')">Edit</button>
+            <button onclick="deleteTodo(${todo.id})">Delete</button>
+          `;
           todoList.appendChild(li);
         });
       }
@@ -32,7 +36,7 @@
           event.preventDefault();
           const title = document.getElementById("title").value;
           const description = document.getElementById("description").value;
-          const response = await fetch("/todos", {
+          await fetch("/todos", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -44,10 +48,28 @@
               completed: false,
             }),
           });
-          if (response.ok) {
-            fetchTodos();
-          }
+          fetchTodos();
         });
+
+      async function editTodo(id, currentTitle, currentDescription) {
+        const title = prompt("Edit Title:", currentTitle);
+        const description = prompt("Edit Description:", currentDescription);
+        if (title && description) {
+          await fetch(`/todos/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id, title, description, completed: false }),
+          });
+          fetchTodos();
+        }
+      }
+
+      async function deleteTodo(id) {
+        await fetch(`/todos/${id}`, { method: "DELETE" });
+        fetchTodos();
+      }
 
       fetchTodos();
     </script>
