@@ -9,6 +9,15 @@
         text-decoration: line-through;
         color: gray;
       }
+      .high {
+        color: red;
+      }
+      .medium {
+        color: orange;
+      }
+      .low {
+        color: green;
+      }
     </style>
   </head>
   <body>
@@ -17,6 +26,12 @@
     <form id="todo-form">
       <input type="text" id="title" placeholder="Title" required />
       <input type="text" id="description" placeholder="Description" required />
+      <input type="date" id="due-date" />
+      <select id="priority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
       <button type="submit">Add To-Do</button>
     </form>
     <script>
@@ -27,15 +42,17 @@
         todoList.innerHTML = "";
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          li.className = todo.completed ? "completed" : "";
+          li.className = todo.completed ? "completed" : todo.priority;
           li.innerHTML = `
-            <span>${todo.title}: ${todo.description}</span>
+            <span>${todo.title} - ${todo.description} ${
+            todo.due_date ? "(Due: " + todo.due_date + ")" : ""
+          }</span>
             <button onclick="toggleTodo(${todo.id})">
               ${todo.completed ? "Undo" : "Complete"}
             </button>
             <button onclick="editTodo(${todo.id}, '${todo.title}', '${
             todo.description
-          }')">Edit</button>
+          }', '${todo.due_date}', '${todo.priority}')">Edit</button>
             <button onclick="deleteTodo(${todo.id})">Delete</button>
           `;
           todoList.appendChild(li);
@@ -48,6 +65,8 @@
           event.preventDefault();
           const title = document.getElementById("title").value;
           const description = document.getElementById("description").value;
+          const dueDate = document.getElementById("due-date").value;
+          const priority = document.getElementById("priority").value;
           await fetch("/todos", {
             method: "POST",
             headers: {
@@ -58,6 +77,8 @@
               title,
               description,
               completed: false,
+              due_date: dueDate,
+              priority,
             }),
           });
           fetchTodos();
@@ -68,16 +89,31 @@
         fetchTodos();
       }
 
-      async function editTodo(id, currentTitle, currentDescription) {
+      async function editTodo(
+        id,
+        currentTitle,
+        currentDescription,
+        currentDueDate,
+        currentPriority
+      ) {
         const title = prompt("Edit Title:", currentTitle);
         const description = prompt("Edit Description:", currentDescription);
+        const dueDate = prompt("Edit Due Date:", currentDueDate || "");
+        const priority = prompt("Edit Priority:", currentPriority || "low");
         if (title && description) {
           await fetch(`/todos/${id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ id, title, description, completed: false }),
+            body: JSON.stringify({
+              id,
+              title,
+              description,
+              completed: false,
+              due_date: dueDate,
+              priority,
+            }),
           });
           fetchTodos();
         }

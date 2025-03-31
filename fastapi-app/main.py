@@ -12,6 +12,8 @@ class TodoItem(BaseModel):
     title: str
     description: str
     completed: bool
+    due_date: str = None  # Optional due date
+    priority: str = "low"  # Default priority is low
 
 # JSON 파일 경로
 TODO_FILE = "todo.json"
