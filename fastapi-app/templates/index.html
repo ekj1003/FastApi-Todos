@@ -18,6 +18,10 @@
       .low {
         color: green;
       }
+      small {
+        font-size: 0.8em;
+        color: #666;
+      }
     </style>
   </head>
   <body>
@@ -32,6 +36,7 @@
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
+      <input type="text" id="tags" placeholder="Tags (comma separated)" />
       <button type="submit">Add To-Do</button>
     </form>
     <script>
@@ -42,19 +47,29 @@
         todoList.innerHTML = "";
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          li.className = todo.completed ? "completed" : todo.priority;
+          li.className = `${todo.completed ? "completed" : ""} ${
+            todo.priority
+          }`;
           li.innerHTML = `
-            <span>${todo.title} - ${todo.description} ${
-            todo.due_date ? "(Due: " + todo.due_date + ")" : ""
-          }</span>
-            <button onclick="toggleTodo(${todo.id})">
-              ${todo.completed ? "Undo" : "Complete"}
-            </button>
-            <button onclick="editTodo(${todo.id}, '${todo.title}', '${
+          <span>
+            ${todo.title} - ${todo.description} 
+            ${todo.due_date ? "(Due: " + todo.due_date + ")" : ""}
+            ${
+              todo.tags.length
+                ? "<br><small>Tags: " + todo.tags.join(", ") + "</small>"
+                : ""
+            }
+          </span>
+          <button onclick="toggleTodo(${todo.id})">
+            ${todo.completed ? "Undo" : "Complete"}
+          </button>
+          <button onclick="editTodo(${todo.id}, '${todo.title}', '${
             todo.description
-          }', '${todo.due_date}', '${todo.priority}')">Edit</button>
-            <button onclick="deleteTodo(${todo.id})">Delete</button>
-          `;
+          }', '${todo.due_date}', '${todo.priority}', ${JSON.stringify(
+            todo.tags
+          )})">Edit</button>
+          <button onclick="deleteTodo(${todo.id})">Delete</button>
+        `;
           todoList.appendChild(li);
         });
       }
@@ -67,11 +82,15 @@
           const description = document.getElementById("description").value;
           const dueDate = document.getElementById("due-date").value;
           const priority = document.getElementById("priority").value;
+          const tags = document
+            .getElementById("tags")
+            .value.split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag);
+
           await fetch("/todos", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               id: Date.now(),
               title,
@@ -79,8 +98,11 @@
               completed: false,
               due_date: dueDate,
               priority,
+              tags,
             }),
           });
+
+          document.getElementById("todo-form").reset();
           fetchTodos();
         });
 
@@ -94,25 +116,43 @@
         currentTitle,
         currentDescription,
         currentDueDate,
-        currentPriority
+        currentPriority,
+        currentTags
       ) {
         const title = prompt("Edit Title:", currentTitle);
         const description = prompt("Edit Description:", currentDescription);
         const dueDate = prompt("Edit Due Date:", currentDueDate || "");
-        const priority = prompt("Edit Priority:", currentPriority || "low");
+        const priority = prompt(
+          "Edit Priority (low, medium, high):",
+          currentPriority
+        );
+        const tagsInput = prompt(
+          "Edit Tags (comma separated):",
+          currentTags.join(", ")
+        );
+
         if (title && description) {
+          const res = await fetch(`/todos`);
+          const todos = await res.json();
+          const original = todos.find((todo) => todo.id === id);
+          if (!original) return;
+
+          const tags = tagsInput
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+
           await fetch(`/todos/${id}`, {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               id,
               title,
               description,
-              completed: false,
               due_date: dueDate,
               priority,
+              tags,
+              completed: original.completed,
             }),
           });
           fetchTodos();
