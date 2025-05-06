@@ -113,7 +113,8 @@ def test_update_todo_not_found():
 
 # 할 일 상태 토글 테스트
 def test_toggle_todo():
-    todo = TodoItem(id=1, title="Toggle", description="To toggle", completed=False, due_date=None)
+    # due_date=None을 due_date=""로 수정
+    todo = TodoItem(id=1, title="Toggle", description="To toggle", completed=False, due_date="")
     save_todos([todo.model_dump()])  # dict() 대신 model_dump() 사용
     response = client.put("/todos/1/toggle")
     assert response.status_code == 200
@@ -122,7 +123,8 @@ def test_toggle_todo():
 
 # 할 일 삭제 테스트
 def test_delete_todo():
-    todo = TodoItem(id=1, title="Delete", description="To delete", completed=False, due_date=None)
+    # due_date=None을 due_date=""로 수정
+    todo = TodoItem(id=1, title="Delete", description="To delete", completed=False, due_date="")
     save_todos([todo.model_dump()])  # dict() 대신 model_dump() 사용
     response = client.delete("/todos/1")
     assert response.status_code == 200
