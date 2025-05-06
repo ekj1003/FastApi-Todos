@@ -1,79 +1,240 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>To-Do List</title>
+    <title>할 일 목록</title>
     <style>
-      .completed {
+      body {
+        font-family: Arial, sans-serif;
+        padding: 30px;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      /* Light Mode */
+      body.light-mode {
+        background-color: #f4f7fc;
+        color: #333;
+      }
+
+      /* Dark Mode */
+      body.dark-mode {
+        background-color: #121212;
+        color: #fff;
+      }
+
+      h1 {
+        text-align: center;
+        color: inherit;
+      }
+
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      /* Dark mode container */
+      body.dark-mode .container {
+        background-color: #333;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      label {
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      input,
+      select {
+        margin-bottom: 15px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+        margin-top: 15px;
+        margin-bottom: 20px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        padding: 15px;
+        background-color: #f9f9f9;
+        margin: 10px 0;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s;
+      }
+
+      li.completed {
         text-decoration: line-through;
         color: gray;
       }
-      .high {
-        color: red;
+
+      li .priority {
+        padding: 5px;
+        font-weight: bold;
       }
-      .medium {
-        color: orange;
-      }
+
+      /* Priority color */
       .low {
         color: green;
       }
+
+      .medium {
+        color: orange;
+      }
+
+      .high {
+        color: red;
+      }
+
       small {
         font-size: 0.8em;
         color: #666;
       }
+
+      .todo-actions button {
+        margin-left: 5px;
+        padding: 5px 10px;
+        font-size: 0.9em;
+        cursor: pointer;
+      }
+
+      .todo-actions button:hover {
+        background-color: #ddd;
+      }
+
+      /* Dark mode list items */
+      body.dark-mode li {
+        background-color: #444;
+      }
     </style>
   </head>
-  <body>
-    <h1>To-Do List</h1>
-    <ul id="todo-list"></ul>
-    <form id="todo-form">
-      <input type="text" id="title" placeholder="Title" required />
-      <input type="text" id="description" placeholder="Description" required />
-      <input type="date" id="due-date" />
-      <select id="priority">
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select>
-      <input type="text" id="tags" placeholder="Tags (comma separated)" />
-      <button type="submit">Add To-Do</button>
-    </form>
+  <body class="light-mode">
+    <div class="container">
+      <h1>📗 할 일 목록</h1>
+      <button id="toggle-mode">다크 모드</button>
+
+      <form id="todo-form">
+        <label for="title">제목</label>
+        <input
+          type="text"
+          id="title"
+          placeholder="제목을 입력하세요"
+          required
+        />
+
+        <label for="description">설명</label>
+        <input
+          type="text"
+          id="description"
+          placeholder="설명을 입력하세요"
+          required
+        />
+
+        <label for="due-date">기한</label>
+        <input type="date" id="due-date" />
+
+        <label for="priority">우선순위</label>
+        <select id="priority">
+          <option value="low">낮음</option>
+          <option value="medium">중간</option>
+          <option value="high">높음</option>
+        </select>
+
+        <label for="tags">태그</label>
+        <input
+          type="text"
+          id="tags"
+          placeholder="태그를 입력하세요 (쉼표로 구분)"
+        />
+
+        <button type="submit">할 일 추가</button>
+      </form>
+
+      <div id="todo-list-container">
+        <h3>할 일 목록</h3>
+        <ul id="todo-list"></ul>
+      </div>
+    </div>
+
     <script>
+      // Function to fetch the list of todos from the backend
       async function fetchTodos() {
         const response = await fetch("/todos");
         const todos = await response.json();
         const todoList = document.getElementById("todo-list");
         todoList.innerHTML = "";
+
         todos.forEach((todo) => {
           const li = document.createElement("li");
           li.className = `${todo.completed ? "completed" : ""} ${
             todo.priority
           }`;
+
           li.innerHTML = `
-          <span>
-            ${todo.title} - ${todo.description} 
-            ${todo.due_date ? "(Due: " + todo.due_date + ")" : ""}
-            ${
-              todo.tags.length
-                ? "<br><small>Tags: " + todo.tags.join(", ") + "</small>"
-                : ""
-            }
-          </span>
-          <button onclick="toggleTodo(${todo.id})">
-            ${todo.completed ? "Undo" : "Complete"}
-          </button>
-          <button onclick="editTodo(${todo.id}, '${todo.title}', '${
+            <div>
+              <span>${todo.title} - ${todo.description}</span><br />
+              ${
+                todo.due_date
+                  ? "<small>(기한: " + todo.due_date + ")</small>"
+                  : ""
+              }
+              ${
+                todo.tags.length
+                  ? "<br><small>태그: " + todo.tags.join(", ") + "</small>"
+                  : ""
+              }
+            </div>
+            <div class="todo-actions">
+              <button onclick="toggleTodo(${todo.id})">${
+            todo.completed ? "취소" : "완료"
+          }</button>
+              <button onclick="editTodo(${todo.id}, '${todo.title}', '${
             todo.description
           }', '${todo.due_date}', '${todo.priority}', ${JSON.stringify(
             todo.tags
-          )})">Edit</button>
-          <button onclick="deleteTodo(${todo.id})">Delete</button>
-        `;
+          )})">수정</button>
+              <button onclick="deleteTodo(${todo.id})">삭제</button>
+            </div>
+          `;
+
           todoList.appendChild(li);
         });
       }
 
+      // Handle form submission to add a new To-Do item
       document
         .getElementById("todo-form")
         .addEventListener("submit", async (event) => {
@@ -103,14 +264,16 @@
           });
 
           document.getElementById("todo-form").reset();
-          fetchTodos();
+          fetchTodos(); // Refresh the todo list
         });
 
+      // Function to toggle the completion status of a todo item
       async function toggleTodo(id) {
         await fetch(`/todos/${id}/toggle`, { method: "PUT" });
         fetchTodos();
       }
 
+      // Function to edit a todo item
       async function editTodo(
         id,
         currentTitle,
@@ -119,15 +282,15 @@
         currentPriority,
         currentTags
       ) {
-        const title = prompt("Edit Title:", currentTitle);
-        const description = prompt("Edit Description:", currentDescription);
-        const dueDate = prompt("Edit Due Date:", currentDueDate || "");
+        const title = prompt("제목 수정:", currentTitle);
+        const description = prompt("설명 수정:", currentDescription);
+        const dueDate = prompt("기한 수정:", currentDueDate || "");
         const priority = prompt(
-          "Edit Priority (low, medium, high):",
+          "우선순위 수정 (low, medium, high):",
           currentPriority
         );
         const tagsInput = prompt(
-          "Edit Tags (comma separated):",
+          "태그 수정 (쉼표로 구분):",
           currentTags.join(", ")
         );
 
@@ -159,12 +322,20 @@
         }
       }
 
+      // Function to delete a todo item
       async function deleteTodo(id) {
         await fetch(`/todos/${id}`, { method: "DELETE" });
         fetchTodos();
       }
 
-      fetchTodos();
+      // Dark mode toggle functionality
+      document.getElementById("toggle-mode").addEventListener("click", () => {
+        const body = document.body;
+        body.classList.toggle("dark-mode");
+        body.classList.toggle("light-mode");
+      });
+
+      fetchTodos(); // Fetch todos on page load
     </script>
   </body>
 </html>
