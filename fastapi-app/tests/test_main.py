@@ -2,7 +2,7 @@ import sys
 import os
 from fastapi.testclient import TestClient
 import pytest
-from fastapi_app.main import app, save_todos, TodoItem
+from fastapi-app.main import app, save_todos, TodoItem
 
 # TestClient로 FastAPI 애플리케이션을 초기화
 client = TestClient(app)
