@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from typing import Optional
 import json
 import os
 
@@ -11,7 +12,7 @@ class TodoItem(BaseModel):
     title: str
     description: str
     completed: bool
-    due_date: str = None
+    due_date: Optional[str] = None
     priority: str = "low"
     tags: list[str] = []  # ✅ 태그 필드 추가
 

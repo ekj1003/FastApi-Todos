@@ -190,7 +190,7 @@
     </div>
 
     <script>
-      // Function to fetch the list of todos from the backend
+      // Function to fetch the list of To-dos from the backend
       async function fetchTodos() {
         const response = await fetch("/todos");
         const todos = await response.json();
@@ -267,13 +267,13 @@
           fetchTodos(); // Refresh the todo list
         });
 
-      // Function to toggle the completion status of a todo item
+      // Function to toggle the completion status of a To-do item
       async function toggleTodo(id) {
         await fetch(`/todos/${id}/toggle`, { method: "PUT" });
         fetchTodos();
       }
 
-      // Function to edit a todo item
+      // Function to edit a To-do item
       async function editTodo(
         id,
         currentTitle,
@@ -322,7 +322,7 @@
         }
       }
 
-      // Function to delete a todo item
+      // Function to delete a To-do item
       async function deleteTodo(id) {
         await fetch(`/todos/${id}`, { method: "DELETE" });
         fetchTodos();
