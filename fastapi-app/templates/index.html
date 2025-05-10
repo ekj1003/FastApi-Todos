@@ -197,11 +197,12 @@
         const todoList = document.getElementById("todo-list");
         todoList.innerHTML = "";
 
+        // Sort todos so that completed ones appear at the bottom
+        todos.sort((a, b) => a.completed - b.completed);
+
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          li.className = `${todo.completed ? "completed" : ""} ${
-            todo.priority
-          }`;
+          li.className = `${todo.completed ? "completed" : ""} ${todo.priority}`;
 
           li.innerHTML = `
             <div>
@@ -270,7 +271,7 @@
       // Function to toggle the completion status of a To-do item
       async function toggleTodo(id) {
         await fetch(`/todos/${id}/toggle`, { method: "PUT" });
-        fetchTodos();
+        fetchTodos(); // Fetch todos again to update the list order
       }
 
       // Function to edit a To-do item
