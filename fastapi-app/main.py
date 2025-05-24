@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
+from typing import List
 import json
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -77,3 +78,14 @@ def read_root():
     with open("templates/index.html", "r") as file:
         content = file.read()
     return HTMLResponse(content=content)
+
+@app.put("/todos/reorder")
+async def reorder_todos(new_order: List[TodoItem]):  # ✅ 자동 검증
+    from pprint import pprint
+    pprint([todo.dict() for todo in new_order])  # 👈 확인용
+    save_todos([todo.dict() for todo in new_order])
+    return {"message": "To-Do order updated"}
+    
+@app.get("/favicon.ico")
+def favicon():
+    return HTMLResponse(status_code=204)

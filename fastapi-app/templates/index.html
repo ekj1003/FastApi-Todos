@@ -140,6 +140,7 @@
         background-color: #444;
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   </head>
   <body class="light-mode">
     <div class="container">
@@ -337,6 +338,50 @@
       });
 
       fetchTodos(); // Fetch todos on page load
+      new Sortable(document.getElementById("todo-list"), {
+        animation: 150,
+        onEnd: function (evt) {
+          saveNewOrder();
+        },
+      });
+
+      async function saveNewOrder() {
+        const listItems = document.querySelectorAll("#todo-list li");
+        const response = await fetch("/todos");
+        const todos = await response.json();
+
+        const newOrder = Array.from(listItems)
+          .map((li) => {
+            const idMatch = li.innerHTML.match(/toggleTodo\((\d+)\)/);
+            return idMatch ? parseInt(idMatch[1]) : null;
+          })
+          .filter((id) => id !== null);
+
+        const reorderedTodos = newOrder.map((id) => {
+          const todo = todos.find((t) => t.id === id);
+          return {
+            id: todo.id,
+            title: todo.title,
+            description: todo.description,
+            completed: todo.completed,
+            due_date: todo.due_date || null,
+            priority: todo.priority || "low",
+            tags: Array.isArray(todo.tags) ? todo.tags : []
+          };
+        });
+
+        const output = JSON.stringify(reorderedTodos, null, 2);
+        console.log("🚀 서버로 보낼 순서:\n" + output);
+        alert(output); // 👈 팝업으로도 JSON 전체 확인 가능
+
+        await fetch("/todos/reorder", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reorderedTodos),
+        });
+
+        fetchTodos();
+      }
     </script>
   </body>
 </html>

@@ -3,33 +3,11 @@
         "id": 1746519993042,
         "title": "6\uc8fc\ucc28 \uacfc\uc81c",
         "description": "\uc624\ud508\uc18c\uc2a4",
-        "completed": true,
+        "completed": false,
         "due_date": "2025-05-08",
         "priority": "high",
         "tags": [
             "#\uc624\ud508\uc18c\uc2a4"
-        ]
-    },
-    {
-        "id": 1746520119092,
-        "title": "Trio \uc571 \uacf5\ubd80",
-        "description": "\uc0b0\ud559\ud504\ub85c\uc81d\ud2b8",
-        "completed": false,
-        "due_date": "2025-05-07",
-        "priority": "high",
-        "tags": [
-            "#\uc0b0\ud559\ud504\ub85c\uc81d\ud2b8"
-        ]
-    },
-    {
-        "id": 1746521431063,
-        "title": "\ub2e4\ud06c\ubaa8\ub4dc \ucd94\uac00",
-        "description": "\uc624\ud508\uc18c\uc2a4",
-        "completed": false,
-        "due_date": "2025-05-08",
-        "priority": "high",
-        "tags": [
-            "#\ub514\uc790\uc778\ubc14\uafb8\uae30"
         ]
     }
 ]
